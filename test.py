@@ -35,9 +35,9 @@ class TestHelperFunctions(unittest.TestCase):
         self.assertEqual(updateState('???? #?????????',[2,3,4]), '???? ### ??##??')
         self.assertEqual(updateState('???? #??????????????',[2,3,4]), '???? ##?????????????')
 
-class TestUpdateGrid(unittest.TestCase):
+class TestSolveGrid(unittest.TestCase):
 
-    def test_updateGrid(self):
+    def test_solveGrid(self):
 
         self.assertEqual(solveGrid([[5],[1,1],[1,1],[1,1],[5]], [[5],[1,1],[1,1],[1,1],[5]]), [
             '#####',
@@ -181,14 +181,14 @@ class TestUpdateGrid(unittest.TestCase):
             '          #        #          '
         ])
 
-    def test_updateGrid_faulty(self):
+    def test_solveGrid_faulty(self):
 
         rowHints = [[5],[1,1],[1,1],[1],[5]]
         colHints = [[5],[1,1],[1,1],[1,1],[5]]
         
         self.assertEqual(solveGrid(rowHints, colHints), [])
 
-    def test_updateGrid_indeterminate(self):
+    def test_solveGrid_indeterminate(self):
 
         rowHints = [[5],[1],[1,1],[1],[1,1]]
         colHints = [[5],[1],[1,1],[1],[1,1]]
