@@ -40,21 +40,21 @@ def updateState(currentState, hints):
     
     return ''.join(generateCellState(cell) for cell in zip(*validGuesses))
 
-def updateGrid(currentRows, rowHints, colHints):
+def rotate(grid):
+    return [''.join(row) for row in zip(*grid)]
 
-    def rotate(grid):
-        return [''.join(row) for row in zip(*grid)]
+def updateGrid(currentRows, rowHints, colHints):
 
     updatedCols = [updateState(col, hints) for col,hints in zip(rotate(currentRows), colHints)]
     updatedRows = [updateState(row, hints) for row,hints in zip(rotate(updatedCols), rowHints)]
 
     return updatedRows
 
-def solveGrid(rowHints, colHints):
+def solveGrid(rowHints, colHints, currentRows = None):
     width = len(colHints)
     height = len(rowHints)
 
-    currentRows = [UNKNOWN*width for row in range(height)]
+    currentRows = currentRows or tuple(UNKNOWN*width for row in range(height))
     unknownCount = width*height
     for i in range(width*height):
         previousUnknownCount = unknownCount
@@ -65,3 +65,36 @@ def solveGrid(rowHints, colHints):
             return currentRows
         
     return currentRows
+
+def search(rowHints, colHints, initialRows = None):
+    currentRows = solveGrid(rowHints, colHints, initialRows)
+    if len(currentRows) == 0: return currentRows
+
+    def replaceAt(currentRows, x, y, newState):
+        return [
+            [currentRows[i][j] if (i!=x or j!=y) else newState for j in range(len(currentRows[i])) ]
+              for i in range(len(currentRows))]
+
+    def findFirstUnknown():
+        for i in range(len(currentRows)):
+            for j in range(len(currentRows[i])):
+                if currentRows[i][j] == UNKNOWN:
+                    return i,j
+
+    unknown = findFirstUnknown()
+
+    if unknown is None:
+        yield tuple(currentRows)
+        return
+
+    i,j = unknown
+
+    emptyGuessState = replaceAt(currentRows, i, j, EMPTY)
+    emptyGuessSolved = search(rowHints, colHints, emptyGuessState)
+
+    yield from emptyGuessSolved
+   
+    filledGuessState = replaceAt(currentRows, i, j, FILLED)
+    filledGuessSolved = search(rowHints, colHints, filledGuessState)
+    
+    yield from filledGuessSolved
