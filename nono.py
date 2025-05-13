@@ -1,7 +1,6 @@
 FILLED = '#'
 EMPTY = ' '
 UNKNOWN = '?'
-ERROR = '!'
 
 def validateGuess(currentState, guess):
 
