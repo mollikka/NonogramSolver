@@ -1,9 +1,12 @@
 from typing import Generator, Tuple, Set, Optional
 
+from functools import cache
+
 FILLED = '#'
 EMPTY = ' '
 UNKNOWN = '?'
 
+@cache
 def generateValidGuesses(currentState: str, hints: Tuple[int, ...]) -> Set[str]:
 
     def recurse(guess: str, countTrailing: int, unusedHints: Tuple[int, ...]) -> Generator[str, None, None]:
@@ -41,8 +44,8 @@ def rotate(grid: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(''.join(row) for row in zip(*grid))
 
 def updateGrid(currentRows: Tuple[str, ...], rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
-    updatedCols = tuple(updateState(col, hints) for col, hints in zip(rotate(currentRows), colHints))
-    updatedRows = tuple(updateState(row, hints) for row, hints in zip(rotate(updatedCols), rowHints))
+    updatedCols = tuple(updateState(col, tuple(hints)) for col, hints in zip(rotate(currentRows), colHints))
+    updatedRows = tuple(updateState(row, tuple(hints)) for row, hints in zip(rotate(updatedCols), rowHints))
     return updatedRows
 
 def solveGrid(rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...], ...], currentRows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
