@@ -4,29 +4,28 @@ FILLED = '#'
 EMPTY = ' '
 UNKNOWN = '?'
 
-def validateGuess(currentState: str, guess: str) -> bool:
-    if len(guess) > len(currentState): return False
-    for guessCell, stateCell in zip(guess, currentState):
-        if stateCell == FILLED and guessCell != FILLED: return False
-        if stateCell == EMPTY and guessCell != EMPTY: return False
-    return True
-
 def generateValidGuesses(currentState: str, hints: Tuple[int, ...]) -> Set[str]:
-    def recurse(gaps: Tuple[int, ...]) -> Generator[str, None, None]:
-        guess = "".join(((EMPTY * gap) + (FILLED * hint) for gap, hint in zip(gaps, hints)))
 
-        if not validateGuess(currentState, guess): return
+    def recurse(guess: str, countTrailing: int, unusedHints: Tuple[int, ...]) -> Generator[str, None, None]:
+        i = len(guess)-1
+        currentHint = unusedHints[0] if unusedHints else None
+        
+        if guess and currentState[i] == FILLED and guess[i] == EMPTY: 
+            return
+        if guess and currentState[i] == EMPTY and guess[i] == FILLED: 
+            return
 
-        if len(gaps) == len(hints):
-            fullGuess = guess + (len(currentState) - len(guess)) * EMPTY
-            if validateGuess(currentState, fullGuess): yield fullGuess
-        else:
-            minimumGap = 0 if len(gaps) == 0 else 1
-            maximumGap = len(currentState) - sum(hints)
-            for gapLength in range(minimumGap, maximumGap + 1):
-                yield from recurse(gaps + (gapLength,))
+        if len(currentState) == len(guess):
+            if len(unusedHints) == 0 or len(unusedHints) == 1 and (countTrailing == currentHint):
+                yield guess
+            return
 
-    return set(recurse(tuple()))
+        if currentHint is not None and (countTrailing < currentHint):
+            yield from recurse(guess+FILLED, countTrailing+1, unusedHints)
+        if currentHint is None or countTrailing == 0 or (countTrailing == currentHint):
+            yield from recurse(guess+EMPTY, 0, unusedHints[1:] if countTrailing == currentHint else unusedHints)
+
+    return set(recurse('', 0, hints))
 
 def updateState(currentState: str, hints: Tuple[int, ...]) -> str:
     validGuesses = generateValidGuesses(currentState, hints)

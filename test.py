@@ -1,18 +1,8 @@
 import unittest
 
-from nono import validateGuess, generateValidGuesses, updateState, solveGrid, search
+from nono import generateValidGuesses, updateState, solveGrid, search
 
 class TestHelperFunctions(unittest.TestCase):
-
-    def test_validateGuess_valid(self):
-        self.assertTrue(validateGuess('### ### ###', '### ### ###'))
-        self.assertTrue(validateGuess('### ### ###', '### ##'))
-        self.assertTrue(validateGuess('#????## ###', '### ### ###'))
-
-    def test_validateGuess_invalid(self):
-        self.assertFalse(validateGuess('### ### ###', ' ## ### ###'))
-        self.assertFalse(validateGuess('### ### ###', ' ### ###'))
-        self.assertFalse(validateGuess('#????## ###', '### ### ## '))
 
     def test_generateGuesses(self):
         self.assertEqual(generateValidGuesses('???????????????', (10,)), 
@@ -241,8 +231,6 @@ class TestSolveGrid(unittest.TestCase):
          '??  #'
         ))
          
-
-
 class TestSearch(unittest.TestCase):
 
     def test_search_multiline_reasoning(self):
