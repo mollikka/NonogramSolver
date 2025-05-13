@@ -68,16 +68,13 @@ def search(rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...
     if not currentRows: return
 
     def replaceAt(currentRows: Tuple[str, ...], x: int, y: int, newState: str) -> Tuple[str, ...]:
-        return tuple(
-            ''.join(currentRows[i][j] if (i != x or j != y) else newState for j in range(len(currentRows[i])))
-            for i in range(len(currentRows))
-        )
+        newRow = currentRows[x][:y] + newState + currentRows[x][y+1:]
+        return currentRows[:x] + (newRow,) + currentRows[x+1:]
 
     def findFirstUnknown() -> Optional[Tuple[int, int]]:
         for i, row in enumerate(currentRows):
-            for j, cell in enumerate(row):
-                if cell == UNKNOWN:
-                    return i, j
+            j = row.find(UNKNOWN)
+            if j != -1: return i,j
         return None
 
     unknown = findFirstUnknown()
