@@ -26,12 +26,13 @@ def generateValidGuesses(currentState, hints):
             minimumGap = 0 if len(gaps) == 0 else 1
             maximumGap = len(currentState) - sum(hints)
             for gapLength in range(minimumGap, maximumGap+1):
-                yield from recurse(gaps+[gapLength])
+                yield from recurse(gaps+(gapLength,))
 
-    return set(recurse([]))
+    return set(recurse(tuple()))
 
 def updateState(currentState, hints):
-    validGuesses = generateValidGuesses(currentState, hints)
+
+    validGuesses = generateValidGuesses(currentState, tuple(hints))
 
     def generateCellState(cellValues):
         if all(value == FILLED for value in cellValues): return FILLED
@@ -41,12 +42,12 @@ def updateState(currentState, hints):
     return ''.join(generateCellState(cell) for cell in zip(*validGuesses))
 
 def rotate(grid):
-    return [''.join(row) for row in zip(*grid)]
+    return tuple(''.join(row) for row in zip(*grid))
 
 def updateGrid(currentRows, rowHints, colHints):
 
-    updatedCols = [updateState(col, hints) for col,hints in zip(rotate(currentRows), colHints)]
-    updatedRows = [updateState(row, hints) for row,hints in zip(rotate(updatedCols), rowHints)]
+    updatedCols = tuple(updateState(col, hints) for col,hints in zip(rotate(currentRows), colHints))
+    updatedRows = tuple(updateState(row, hints) for row,hints in zip(rotate(updatedCols), rowHints))
 
     return updatedRows
 
@@ -71,9 +72,9 @@ def search(rowHints, colHints, initialRows = None):
     if len(currentRows) == 0: return currentRows
 
     def replaceAt(currentRows, x, y, newState):
-        return [
-            [currentRows[i][j] if (i!=x or j!=y) else newState for j in range(len(currentRows[i])) ]
-              for i in range(len(currentRows))]
+        return tuple(
+            tuple(currentRows[i][j] if (i!=x or j!=y) else newState for j in range(len(currentRows[i])) )
+              for i in range(len(currentRows)))
 
     def findFirstUnknown():
         for i in range(len(currentRows)):

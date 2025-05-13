@@ -15,43 +15,43 @@ class TestHelperFunctions(unittest.TestCase):
         self.assertFalse(validateGuess('#????## ###', '### ### ## '))
 
     def test_generateGuesses(self):
-        self.assertEqual(generateValidGuesses('???????????????', [10]), 
+        self.assertEqual(generateValidGuesses('???????????????', (10,)), 
                          {  '##########     ',' ##########    ',
                             '  ##########   ','   ##########  ',
                             '    ########## ', '     ##########'
                          })
-        self.assertEqual(generateValidGuesses('#####   ?????', [5,4]), 
+        self.assertEqual(generateValidGuesses('#####   ?????', (5,4)), 
                          {  '#####   #### ',
                             '#####    ####'
                          })
-        self.assertEqual(generateValidGuesses('?????', []), {'     '})
+        self.assertEqual(generateValidGuesses('?????', tuple()), {'     '})
 
     def test_generateNewState(self):
-        self.assertEqual(updateState('??????????',[]), '          ')
-        self.assertEqual(updateState('??????????',[10]), '##########')
-        self.assertEqual(updateState('??????????',[5,4]), '##### ####')
-        self.assertEqual(updateState('??????????',[6]), '????##????')
-        self.assertEqual(updateState('???#?????#',[3,1,2]), ' ?##??? ##')
-        self.assertEqual(updateState('???? #?????????',[2,3,4]), '???? ### ??##??')
-        self.assertEqual(updateState('???? #??????????????',[2,3,4]), '???? ##?????????????')
+        self.assertEqual(updateState('??????????',tuple()), '          ')
+        self.assertEqual(updateState('??????????',(10,)), '##########')
+        self.assertEqual(updateState('??????????',(5,4)), '##### ####')
+        self.assertEqual(updateState('??????????',(6,)), '????##????')
+        self.assertEqual(updateState('???#?????#',(3,1,2)), ' ?##??? ##')
+        self.assertEqual(updateState('???? #?????????',(2,3,4)), '???? ### ??##??')
+        self.assertEqual(updateState('???? #??????????????',(2,3,4)), '???? ##?????????????')
 
 class TestSolveGrid(unittest.TestCase):
 
     def test_solveGrid(self):
 
-        self.assertEqual(solveGrid([[5],[1,1],[1,1],[1,1],[5]], [[5],[1,1],[1,1],[1,1],[5]]), [
+        self.assertEqual(solveGrid([[5],[1,1],[1,1],[1,1],[5]], [[5],[1,1],[1,1],[1,1],[5]]), (
             '#####',
             '#   #',
             '#   #',
             '#   #',
             '#####'
-        ])
+        ))
 
-        self.assertEqual(solveGrid([[5],[2,1],[5]], [[3],[3],[1,1],[1,1],[3]]), [
+        self.assertEqual(solveGrid([[5],[2,1],[5]], [[3],[3],[1,1],[1,1],[3]]), (
             '#####',
             '##  #',
             '#####'
-        ])
+        ))
 
         # Japanilaiset Nonogram-ristikot 1/2025, sivu 4, "2. Lääkärin hedelmä"
         self.assertEqual(solveGrid([
@@ -86,7 +86,7 @@ class TestSolveGrid(unittest.TestCase):
             [3,8],
             [2,6],
             [1,2]
-        ]), [
+        ]), (
             '      #   #####',
             '      ## ##### ',
             '       ######  ',
@@ -102,7 +102,7 @@ class TestSolveGrid(unittest.TestCase):
             ' ########  ##  ',
             '  ##########   ',
             '    ######     '
-        ])
+        ))
 
         # https://en.wikipedia.org/wiki/File:Nonogram_wiki.svg
         # Nonogram puzzle of the Wikipedia icon by Gus Polly at English Wikipedia
@@ -158,7 +158,7 @@ class TestSolveGrid(unittest.TestCase):
             [3],
             [1],
             [1]
-        ]), [
+        ]), (
             '######## ####### ##### #######',
             '  #####   ####    ###    ###  ',
             '   ###     ###    ##     ###  ',
@@ -179,27 +179,27 @@ class TestSolveGrid(unittest.TestCase):
             '         ###      ###         ',
             '         ###      ###         ',
             '          #        #          '
-        ])
+        ))
 
     def test_solveGrid_faulty(self):
 
         rowHints = [[5],[1,1],[1,1],[1],[5]]
         colHints = [[5],[1,1],[1,1],[1,1],[5]]
         
-        self.assertEqual(solveGrid(rowHints, colHints), [])
+        self.assertEqual(solveGrid(rowHints, colHints), tuple())
 
     def test_solveGrid_indeterminate(self):
 
         rowHints = [[5],[1],[1,1],[1],[1,1]]
         colHints = [[5],[1],[1,1],[1],[1,1]]
         
-        self.assertEqual(solveGrid(rowHints, colHints), [
+        self.assertEqual(solveGrid(rowHints, colHints), (
             '#####',
             '#    ',
             '# ? ?',
             '#    ',
             '# ? ?'
-        ])
+        ))
     
     def test_solveGrid_multiline_reasoning(self):
         # https://puzzling.stackexchange.com/questions/129849/nonograms-that-require-more-than-single-line-logic
@@ -210,23 +210,23 @@ class TestSolveGrid(unittest.TestCase):
             [1,1],
             [2]
         ]), 
-        [
+        (
             '??',
             '??',
             '??',
             '??'
-        ])
+        ))
 
         self.assertEqual(solveGrid( [
             [2],[1],[],[2],[2]
         ], [
             [2],[2],[],[2],[1]
         ]), 
-        ['?? ??',
+        ('?? ??',
          '?? ??',
          '     ',
          '?? ??',
-         '?? ??'])
+         '?? ??'))
         
         self.assertEqual(solveGrid( [
             [1],[2],[2],[2,1],[1,1]
@@ -234,12 +234,12 @@ class TestSolveGrid(unittest.TestCase):
         [
             [2],[2],[2],[2],[2]
         ]), 
-        ['  ?? ',
+        ('  ?? ',
          '  ## ',
          '???? ',
          '##  #',
          '??  #'
-        ])
+        ))
          
 
 
