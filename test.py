@@ -4,19 +4,19 @@ from nono import generate_valid_guesses, update_row, solve_grid, search
 
 class TestHelperFunctions(unittest.TestCase):
 
-    def test_generateGuesses(self):
-        self.assertEqual(generate_valid_guesses('???????????????', (10,)), 
+    def test_generate_valid_guesses(self):
+        self.assertEqual(set(generate_valid_guesses('???????????????', (10,))), 
                          {  '##########     ',' ##########    ',
                             '  ##########   ','   ##########  ',
                             '    ########## ', '     ##########'
                          })
-        self.assertEqual(generate_valid_guesses('#####   ?????', (5,4)), 
+        self.assertEqual(set(generate_valid_guesses('#####   ?????', (5,4))), 
                          {  '#####   #### ',
                             '#####    ####'
                          })
-        self.assertEqual(generate_valid_guesses('?????', tuple()), {'     '})
+        self.assertEqual(set(generate_valid_guesses('?????', tuple())), {'     '})
 
-    def test_generatenew_state(self):
+    def test_update_row(self):
         self.assertEqual(update_row('??????????',tuple()), '          ')
         self.assertEqual(update_row('??????????',(10,)), '##########')
         self.assertEqual(update_row('??????????',(5,4)), '##### ####')
