@@ -7,19 +7,19 @@ EMPTY = ' '
 UNKNOWN = '?'
 
 @cache
-def generate_valid_guesses(current_state: str, hints: Tuple[int, ...]) -> Set[str]:
+def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Set[str]:
 
     def recurse(guess: str, count_trailing: int, unused_hints: Tuple[int, ...])\
         -> Generator[str, None, None]:
         i = len(guess)-1
         current_hint = unused_hints[0] if unused_hints else None
 
-        if guess and current_state[i] == FILLED and guess[i] == EMPTY:
+        if guess and current_row[i] == FILLED and guess[i] == EMPTY:
             return
-        if guess and current_state[i] == EMPTY and guess[i] == FILLED:
+        if guess and current_row[i] == EMPTY and guess[i] == FILLED:
             return
 
-        if len(current_state) == len(guess):
+        if len(current_row) == len(guess):
             if len(unused_hints) == 0 or \
                 len(unused_hints) == 1 and (count_trailing == current_hint):
                 yield guess
@@ -31,10 +31,10 @@ def generate_valid_guesses(current_state: str, hints: Tuple[int, ...]) -> Set[st
             yield from recurse(guess+EMPTY, 0,
                                unused_hints[1:] if count_trailing == current_hint else unused_hints)
 
-    return set(recurse('', 0, hints))
+    return set(recurse('', 0, row_hint))
 
-def update_state(current_state: str, hints: Tuple[int, ...]) -> str:
-    valid_guesses = generate_valid_guesses(current_state, hints)
+def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
+    valid_guesses = generate_valid_guesses(current_row, row_hint)
 
     def generate_cell_state(cell_values: Tuple[str, ...]) -> str:
         if all(value == FILLED for value in cell_values):
@@ -45,25 +45,25 @@ def update_state(current_state: str, hints: Tuple[int, ...]) -> str:
 
     return ''.join(generate_cell_state(cell) for cell in zip(*valid_guesses))
 
-def rotate(grid: Tuple[str, ...]) -> Tuple[str, ...]:
-    return tuple(''.join(row) for row in zip(*grid))
+def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
+    return tuple(''.join(row) for row in zip(*current_rows))
 
 def update_grid(current_rows: Tuple[str, ...],
                 row_hints: Tuple[Tuple[int, ...], ...],
                 col_hints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
-    updated_cols = tuple(update_state(col, tuple(hints))
+    updated_cols = tuple(update_row(col, tuple(hints))
                          for col, hints in zip(rotate(current_rows), col_hints))
-    updated_rows = tuple(update_state(row, tuple(hints))
+    updated_rows = tuple(update_row(row, tuple(hints))
                          for row, hints in zip(rotate(updated_cols), row_hints))
     return updated_rows
 
 def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                col_hints: Tuple[Tuple[int, ...], ...],
-               current_rows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
+               initial_rows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
     width = len(col_hints)
     height = len(row_hints)
 
-    current_rows = current_rows or tuple(UNKNOWN * width for _ in range(height))
+    current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
     unknown_count = width * height
     for _ in range(width * height):
         previous_unknown_count = unknown_count
