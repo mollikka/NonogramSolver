@@ -7,85 +7,102 @@ EMPTY = ' '
 UNKNOWN = '?'
 
 @cache
-def generateValidGuesses(currentState: str, hints: Tuple[int, ...]) -> Set[str]:
+def generate_valid_guesses(current_state: str, hints: Tuple[int, ...]) -> Set[str]:
 
-    def recurse(guess: str, countTrailing: int, unusedHints: Tuple[int, ...]) -> Generator[str, None, None]:
+    def recurse(guess: str, count_trailing: int, unused_hints: Tuple[int, ...])\
+        -> Generator[str, None, None]:
         i = len(guess)-1
-        currentHint = unusedHints[0] if unusedHints else None
-        
-        if guess and currentState[i] == FILLED and guess[i] == EMPTY: 
+        current_hint = unused_hints[0] if unused_hints else None
+
+        if guess and current_state[i] == FILLED and guess[i] == EMPTY:
             return
-        if guess and currentState[i] == EMPTY and guess[i] == FILLED: 
+        if guess and current_state[i] == EMPTY and guess[i] == FILLED:
             return
 
-        if len(currentState) == len(guess):
-            if len(unusedHints) == 0 or len(unusedHints) == 1 and (countTrailing == currentHint):
+        if len(current_state) == len(guess):
+            if len(unused_hints) == 0 or \
+                len(unused_hints) == 1 and (count_trailing == current_hint):
                 yield guess
             return
 
-        if currentHint is not None and (countTrailing < currentHint):
-            yield from recurse(guess+FILLED, countTrailing+1, unusedHints)
-        if currentHint is None or countTrailing == 0 or (countTrailing == currentHint):
-            yield from recurse(guess+EMPTY, 0, unusedHints[1:] if countTrailing == currentHint else unusedHints)
+        if current_hint is not None and (count_trailing < current_hint):
+            yield from recurse(guess+FILLED, count_trailing+1, unused_hints)
+        if current_hint is None or count_trailing == 0 or (count_trailing == current_hint):
+            yield from recurse(guess+EMPTY, 0,
+                               unused_hints[1:] if count_trailing == current_hint else unused_hints)
 
     return set(recurse('', 0, hints))
 
-def updateState(currentState: str, hints: Tuple[int, ...]) -> str:
-    validGuesses = generateValidGuesses(currentState, hints)
+def update_state(current_state: str, hints: Tuple[int, ...]) -> str:
+    valid_guesses = generate_valid_guesses(current_state, hints)
 
-    def generateCellState(cellValues: Tuple[str, ...]) -> str:
-        if all(value == FILLED for value in cellValues): return FILLED
-        if all(value == EMPTY for value in cellValues): return EMPTY
+    def generate_cell_state(cell_values: Tuple[str, ...]) -> str:
+        if all(value == FILLED for value in cell_values):
+            return FILLED
+        if all(value == EMPTY for value in cell_values):
+            return EMPTY
         return UNKNOWN
 
-    return ''.join(generateCellState(cell) for cell in zip(*validGuesses))
+    return ''.join(generate_cell_state(cell) for cell in zip(*valid_guesses))
 
 def rotate(grid: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(''.join(row) for row in zip(*grid))
 
-def updateGrid(currentRows: Tuple[str, ...], rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
-    updatedCols = tuple(updateState(col, tuple(hints)) for col, hints in zip(rotate(currentRows), colHints))
-    updatedRows = tuple(updateState(row, tuple(hints)) for row, hints in zip(rotate(updatedCols), rowHints))
-    return updatedRows
+def update_grid(current_rows: Tuple[str, ...],
+                row_hints: Tuple[Tuple[int, ...], ...],
+                col_hints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
+    updated_cols = tuple(update_state(col, tuple(hints))
+                         for col, hints in zip(rotate(current_rows), col_hints))
+    updated_rows = tuple(update_state(row, tuple(hints))
+                         for row, hints in zip(rotate(updated_cols), row_hints))
+    return updated_rows
 
-def solveGrid(rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...], ...], currentRows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
-    width = len(colHints)
-    height = len(rowHints)
+def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
+               col_hints: Tuple[Tuple[int, ...], ...],
+               current_rows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
+    width = len(col_hints)
+    height = len(row_hints)
 
-    currentRows = currentRows or tuple(UNKNOWN * width for _ in range(height))
-    unknownCount = width * height
+    current_rows = current_rows or tuple(UNKNOWN * width for _ in range(height))
+    unknown_count = width * height
     for _ in range(width * height):
-        previousUnknownCount = unknownCount
-        currentRows = updateGrid(currentRows, rowHints, colHints)
-        unknownCount = sum(row.count(UNKNOWN) for row in currentRows)
+        previous_unknown_count = unknown_count
+        current_rows = update_grid(current_rows, row_hints, col_hints)
+        unknown_count = sum(row.count(UNKNOWN) for row in current_rows)
 
-        if unknownCount == previousUnknownCount:
-            return currentRows
-    return currentRows
+        if unknown_count == previous_unknown_count:
+            return current_rows
+    return current_rows
 
-def search(rowHints: Tuple[Tuple[int, ...], ...], colHints: Tuple[Tuple[int, ...], ...], initialRows: Optional[Tuple[str, ...]] = None) -> Generator[Tuple[str, ...], None, None]:
-    currentRows = solveGrid(rowHints, colHints, initialRows)
-    if not currentRows: return
+def search(row_hints: Tuple[Tuple[int, ...], ...],
+           col_hints: Tuple[Tuple[int, ...], ...],
+           initial_rows: Optional[Tuple[str, ...]] = None)\
+            -> Generator[Tuple[str, ...], None, None]:
+    current_rows = solve_grid(row_hints, col_hints, initial_rows)
+    if not current_rows:
+        return
 
-    def replaceAt(currentRows: Tuple[str, ...], x: int, y: int, newState: str) -> Tuple[str, ...]:
-        newRow = currentRows[x][:y] + newState + currentRows[x][y+1:]
-        return currentRows[:x] + (newRow,) + currentRows[x+1:]
+    def replace_at(current_rows: Tuple[str, ...], x: int, y: int, new_state: str)\
+        -> Tuple[str, ...]:
+        new_row = current_rows[x][:y] + new_state + current_rows[x][y+1:]
+        return current_rows[:x] + (new_row,) + current_rows[x+1:]
 
-    def findFirstUnknown() -> Optional[Tuple[int, int]]:
-        for i, row in enumerate(currentRows):
+    def find_first_unknown() -> Optional[Tuple[int, int]]:
+        for i, row in enumerate(current_rows):
             j = row.find(UNKNOWN)
-            if j != -1: return i,j
+            if j != -1:
+                return i,j
         return None
 
-    unknown = findFirstUnknown()
+    unknown = find_first_unknown()
     if unknown is None:
-        yield currentRows
+        yield current_rows
         return
 
     i, j = unknown
 
-    emptyGuessState = replaceAt(currentRows, i, j, EMPTY)
-    yield from search(rowHints, colHints, emptyGuessState)
+    empty_guess_state = replace_at(current_rows, i, j, EMPTY)
+    yield from search(row_hints, col_hints, empty_guess_state)
 
-    filledGuessState = replaceAt(currentRows, i, j, FILLED)
-    yield from search(rowHints, colHints, filledGuessState)
+    filled_guess_state = replace_at(current_rows, i, j, FILLED)
+    yield from search(row_hints, col_hints, filled_guess_state)
