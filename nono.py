@@ -25,6 +25,10 @@ def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Gener
                 yield guess
             return
 
+        # optimization: exit early if the remaining hints take more space than is available
+        if sum(unused_hints[1:]) + len(unused_hints) - 1 > len(current_row) - len(guess):
+            return
+        
         if current_hint is not None and (count_trailing < current_hint):
             yield from recurse(guess+FILLED, count_trailing+1, unused_hints)
         if current_hint is None or count_trailing == 0 or (count_trailing == current_hint):

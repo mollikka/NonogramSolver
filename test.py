@@ -286,7 +286,6 @@ class TestSearch(unittest.TestCase):
           '#   #')
         })
 
-    @unittest.skip('very slow')
     def  test_search_multiline_reasoning_big(self):
         # Puzzle 371 from Nonogram Galaxy 2
         self.assertEqual(next(search( (
