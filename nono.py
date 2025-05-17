@@ -33,7 +33,15 @@ def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Set[s
 
     return set(recurse('', 0, row_hint))
 
+@cache
 def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
+    
+    # optimization: exit early in trivial case and cases where no progress can be made
+    if len(row_hint) == 0: return EMPTY*len(current_row)
+    if (current_row.count(UNKNOWN) == len(current_row)) and \
+        (len(row_hint) + sum(row_hint) < len(current_row)/2):
+        return current_row
+    
     valid_guesses = generate_valid_guesses(current_row, row_hint)
 
     def generate_cell_state(cell_values: Tuple[str, ...]) -> str:
