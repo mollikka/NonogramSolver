@@ -7,7 +7,7 @@ EMPTY = ' '
 UNKNOWN = '?'
 
 @cache
-def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Set[str]:
+def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Generator[str, None, None]:
 
     def recurse(guess: str, count_trailing: int, unused_hints: Tuple[int, ...])\
         -> Generator[str, None, None]:
@@ -18,7 +18,7 @@ def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Set[s
             return
         if guess and current_row[i] == EMPTY and guess[i] == FILLED:
             return
-
+        
         if len(current_row) == len(guess):
             if len(unused_hints) == 0 or \
                 len(unused_hints) == 1 and (count_trailing == current_hint):
@@ -31,7 +31,7 @@ def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Set[s
             yield from recurse(guess+EMPTY, 0,
                                unused_hints[1:] if count_trailing == current_hint else unused_hints)
 
-    return set(recurse('', 0, row_hint))
+    return recurse('', 0, row_hint)
 
 @cache
 def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
