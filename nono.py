@@ -59,9 +59,9 @@ def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
 def update_grid(current_rows: Tuple[str, ...],
                 row_hints: Tuple[Tuple[int, ...], ...],
                 col_hints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
-    updated_cols = tuple(update_row(col, tuple(hints))
+    updated_cols = tuple(update_row(col, hints)
                          for col, hints in zip(rotate(current_rows), col_hints))
-    updated_rows = tuple(update_row(row, tuple(hints))
+    updated_rows = tuple(update_row(row, hints)
                          for row, hints in zip(rotate(updated_cols), row_hints))
     return updated_rows
 
