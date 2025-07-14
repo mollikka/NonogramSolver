@@ -1,4 +1,4 @@
-from typing import Generator, Tuple, Set, Optional
+from typing import Generator, Tuple, Optional, Callable
 
 from functools import cache
 
@@ -62,35 +62,52 @@ def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
 
 def update_grid(current_rows: Tuple[str, ...],
                 row_hints: Tuple[Tuple[int, ...], ...],
-                col_hints: Tuple[Tuple[int, ...], ...]) -> Tuple[str, ...]:
-    updated_cols = tuple(update_row(col, hints)
-                         for col, hints in zip(rotate(current_rows), col_hints))
-    updated_rows = tuple(update_row(row, hints)
-                         for row, hints in zip(rotate(updated_cols), row_hints))
-    return updated_rows
+                col_hints: Tuple[Tuple[int, ...], ...],
+                on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None) -> Tuple[str, ...]:
+ 
+    current_cols = rotate(current_rows)
+    
+    for i, [col, hints] in enumerate(zip(current_cols, col_hints)):
+        new_col = update_row(col, hints)
+        current_cols = current_cols[:i] + (new_col,) + current_cols[i+1:]
+        if on_update: on_update(rotate(current_cols), None, i)
+
+    current_rows = rotate(current_cols)
+
+    for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
+        new_row = update_row(row, hints)
+        current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
+        if on_update: on_update(current_rows, i, None)
+    
+    return current_rows
+
 
 def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                col_hints: Tuple[Tuple[int, ...], ...],
-               initial_rows: Optional[Tuple[str, ...]] = None) -> Tuple[str, ...]:
+               initial_rows: Optional[Tuple[str, ...]] = None, 
+               on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None) -> Tuple[str, ...]:
     width = len(col_hints)
     height = len(row_hints)
-
+    
     current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
+    if on_update: on_update(current_rows, None, None)
     unknown_count = width * height
     for _ in range(width * height):
         previous_unknown_count = unknown_count
-        current_rows = update_grid(current_rows, row_hints, col_hints)
+        current_rows = update_grid(current_rows, row_hints, col_hints, on_update)
         unknown_count = sum(row.count(UNKNOWN) for row in current_rows)
-
+        if on_update: on_update(current_rows, None, None)
         if unknown_count == previous_unknown_count:
             return current_rows
     return current_rows
 
 def search(row_hints: Tuple[Tuple[int, ...], ...],
            col_hints: Tuple[Tuple[int, ...], ...],
-           initial_rows: Optional[Tuple[str, ...]] = None)\
+           initial_rows: Optional[Tuple[str, ...]] = None,
+           on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None)\
             -> Generator[Tuple[str, ...], None, None]:
-    current_rows = solve_grid(row_hints, col_hints, initial_rows)
+
+    current_rows = solve_grid(row_hints, col_hints, initial_rows, on_update)
     if not current_rows:
         return
 
@@ -114,7 +131,7 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
     i, j = unknown
 
     empty_guess_state = replace_at(current_rows, i, j, EMPTY)
-    yield from search(row_hints, col_hints, empty_guess_state)
+    yield from search(row_hints, col_hints, empty_guess_state, on_update)
 
     filled_guess_state = replace_at(current_rows, i, j, FILLED)
-    yield from search(row_hints, col_hints, filled_guess_state)
+    yield from search(row_hints, col_hints, filled_guess_state, on_update)
