@@ -1,4 +1,4 @@
-from typing import Generator, Tuple, Optional, Callable
+from typing import Generator, Tuple, Optional, Callable, Set
 
 from functools import cache
 
@@ -61,6 +61,23 @@ def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
 def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(''.join(row) for row in zip(*current_rows))
 
+def update_rows(current_rows: Tuple[str, ...], 
+                row_hints: Tuple[Tuple[int, ...], ...],
+                rows_to_explore: Optional[Set[int]] = None,
+                on_update: Optional[Callable[[Tuple[str, ...], int], None]] = None) -> Tuple[Tuple[str, ...], Set[int]]:
+
+    updated_cols = set()
+    for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
+        if rows_to_explore and (not i in rows_to_explore):
+            continue
+
+        new_row = update_row(row, hints)
+        current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
+        if on_update: on_update(current_rows, i)
+        updated_cols.update({i for i in range(len(new_row)) if row[i] != new_row[i]})
+
+    return current_rows, updated_cols
+
 def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                col_hints: Tuple[Tuple[int, ...], ...],
                initial_rows: Optional[Tuple[str, ...]] = None, 
@@ -69,34 +86,27 @@ def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
     height = len(row_hints)
 
     current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
-    if on_update: on_update(current_rows, None, None)
+    
+    def on_update_row(current_rows: Tuple[str, ...], i: int):
+        if on_update: on_update(current_rows, i, None)
 
-    rows_changed = True
-    cols_changed = True
+    def on_update_col(current_rows: Tuple[str, ...], i: int):
+        if on_update: on_update(rotate(current_rows), None, i)
+
+    cols_to_explore = set(range(width))
     first_round = True
+
     for _ in range(width * height):
-
-        cols_changed = False
+        if len(cols_to_explore) == 0: break
         current_cols = rotate(current_rows)
-        for i, [col, hints] in enumerate(zip(current_cols, col_hints)):
-            new_col = update_row(col, hints)
-            current_cols = current_cols[:i] + (new_col,) + current_cols[i+1:]
-            cols_changed = cols_changed or (new_col != col)
-            if on_update: on_update(rotate(current_cols), None, i)
+        current_cols, rows_to_explore = update_rows(current_cols, col_hints, cols_to_explore, on_update_col)
         current_rows = rotate(current_cols)
-
-        if not (first_round or cols_changed): break
-
-        rows_changed = False
-        for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
-            new_row = update_row(row, hints)
-            current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
-            rows_changed = rows_changed or (new_row != row)
-            if on_update: on_update(current_rows, i, None)
-
-        if not (first_round or rows_changed): break
+        if first_round: rows_to_explore = set(range(height))
+        if len(rows_to_explore) == 0: break
+        current_rows, cols_to_explore = update_rows(current_rows, row_hints, rows_to_explore, on_update_row)
+    
         first_round = False
-        
+
     if on_update: on_update(current_rows, None, None)
     return current_rows
 
