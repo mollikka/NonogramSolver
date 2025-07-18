@@ -57,6 +57,14 @@ class Testsolve_grid(unittest.TestCase):
         
         self.assertEqual(solve_grid(row_hints, col_hints), tuple())
 
+    def test_solve_grid_first_round_finds_nothing(self):
+
+        row_hints = ((),(5,),(),(),(),)
+        col_hints = ((1,),(1,),(1,),(1,),(1,),)
+        
+        self.assertEqual(solve_grid(row_hints, col_hints), ('     ', '#####',  '     ', '     ', '     '))        
+        self.assertEqual(solve_grid(col_hints, row_hints), (' #   ', ' #   ',  ' #   ', ' #   ', ' #   '))
+
     def test_solve_grid_indeterminate(self):
 
         row_hints = ((5,),(1,),(1,1,),(1,),(1,1,),)

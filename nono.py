@@ -57,30 +57,9 @@ def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
 
     return ''.join(generate_cell_state(cell) for cell in zip(*valid_guesses))
 
+@cache
 def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(''.join(row) for row in zip(*current_rows))
-
-def update_grid(current_rows: Tuple[str, ...],
-                row_hints: Tuple[Tuple[int, ...], ...],
-                col_hints: Tuple[Tuple[int, ...], ...],
-                on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None) -> Tuple[str, ...]:
- 
-    current_cols = rotate(current_rows)
-    
-    for i, [col, hints] in enumerate(zip(current_cols, col_hints)):
-        new_col = update_row(col, hints)
-        current_cols = current_cols[:i] + (new_col,) + current_cols[i+1:]
-        if on_update: on_update(rotate(current_cols), None, i)
-
-    current_rows = rotate(current_cols)
-
-    for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
-        new_row = update_row(row, hints)
-        current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
-        if on_update: on_update(current_rows, i, None)
-    
-    return current_rows
-
 
 def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                col_hints: Tuple[Tuple[int, ...], ...],
@@ -88,17 +67,37 @@ def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None) -> Tuple[str, ...]:
     width = len(col_hints)
     height = len(row_hints)
-    
+
     current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
     if on_update: on_update(current_rows, None, None)
-    unknown_count = width * height
+
+    rows_changed = True
+    cols_changed = True
+    first_round = True
     for _ in range(width * height):
-        previous_unknown_count = unknown_count
-        current_rows = update_grid(current_rows, row_hints, col_hints, on_update)
-        unknown_count = sum(row.count(UNKNOWN) for row in current_rows)
-        if on_update: on_update(current_rows, None, None)
-        if unknown_count == previous_unknown_count:
-            return current_rows
+
+        cols_changed = False
+        current_cols = rotate(current_rows)
+        for i, [col, hints] in enumerate(zip(current_cols, col_hints)):
+            new_col = update_row(col, hints)
+            current_cols = current_cols[:i] + (new_col,) + current_cols[i+1:]
+            cols_changed = cols_changed or (new_col != col)
+            if on_update: on_update(rotate(current_cols), None, i)
+        current_rows = rotate(current_cols)
+
+        if not (first_round or cols_changed): break
+
+        rows_changed = False
+        for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
+            new_row = update_row(row, hints)
+            current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
+            rows_changed = rows_changed or (new_row != row)
+            if on_update: on_update(current_rows, i, None)
+
+        if not (first_round or rows_changed): break
+        first_round = False
+        
+    if on_update: on_update(current_rows, None, None)
     return current_rows
 
 def search(row_hints: Tuple[Tuple[int, ...], ...],
