@@ -54,8 +54,9 @@ def render_animation(fixture: fixtures.Fixture, path: str):
         if grid:
             frames.append(draw_frame(grid, highlightRow, highlightCol))
 
-    result = solve_grid(fixture.rows, fixture.cols, None, append_frame)
-    draw_frame(result, None, None)
+    results = search(fixture.rows, fixture.cols, None, append_frame)
+    for result in results:
+        draw_frame(result, None, None)
     
     save_gif(frames, path)
 
@@ -63,3 +64,5 @@ if __name__ == '__main__':
 
     render_animation(fixtures.apple, 'apple.gif')
     render_animation(fixtures.wikipedia, 'wikipedia.gif')
+    render_animation(fixtures.rose, 'rose.gif')
+    render_animation(fixtures.galaxy, 'galaxy.gif')

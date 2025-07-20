@@ -140,7 +140,9 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
     i, j = unknown
 
     empty_guess_state = replace_at(current_rows, i, j, EMPTY)
+    if on_update: on_update(empty_guess_state, i, j)
     yield from search(row_hints, col_hints, empty_guess_state, on_update)
 
     filled_guess_state = replace_at(current_rows, i, j, FILLED)
+    if on_update: on_update(filled_guess_state, i, j)
     yield from search(row_hints, col_hints, filled_guess_state, on_update)
