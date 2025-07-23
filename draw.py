@@ -73,6 +73,22 @@ def render_animation(fixture: fixtures.Fixture, path: str):
 
 if __name__ == '__main__':
 
+    indeterminate = fixtures.Fixture(((5,),(1,),(1,1,),(1,),(1,1,),),
+                    ((5,),(1,),(1,1,),(1,),(1,1,),),'')
+    render_animation(indeterminate, 'indeterminate.gif')
+
+    multiline_reasoning = fixtures.Fixture((
+            (2,),(1,),(),(2,),(2,)
+        ,), (
+            (2,),(2,),(),(2,),(1,)
+        ,),'')
+    render_animation(multiline_reasoning, 'multiline.gif')
+
+    faulty = fixtures.Fixture(((5,),(1,1,),(1,1,),(1,),(5,),),
+                    ((5,),(1,1,),(1,1,),(1,1,),(5,),),'')
+    render_animation(faulty, 'faulty.gif')
+
+    render_animation(fixtures.chessboard, 'chessboard.gif')
     render_animation(fixtures.apple, 'apple.gif')
     render_animation(fixtures.wikipedia, 'wikipedia.gif')
     render_animation(fixtures.rose, 'rose.gif')
