@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw
-from typing import Tuple, Optional
-from nono import FILLED, EMPTY, UNKNOWN, solve_grid, search
+from typing import Tuple, Optional, List
+from nono import FILLED, EMPTY, UNKNOWN, search, Event
 import fixtures
 
 CELL_SIZE = 20
@@ -22,8 +22,8 @@ COLORS_HIGHLIGHT = {
 
 def draw_frame(grid: Tuple[str, ...], highlightRow: Optional[int] = None, highlightCol: Optional[int] = None) -> Image.Image:
     height = len(grid)
-    width = len(grid[0])
-    image = Image.new('RGB', (width * CELL_SIZE, height * CELL_SIZE), ERROR_COLOR)
+    width = len(grid[0]) if height else 0
+    image = Image.new('RGB', (max(1,width * CELL_SIZE), max(1,height * CELL_SIZE)), ERROR_COLOR)
     draw = ImageDraw.Draw(image)
 
     for j, row in enumerate(grid):
@@ -44,21 +44,32 @@ def draw_frame(grid: Tuple[str, ...], highlightRow: Optional[int] = None, highli
 
     return image
 
-def save_gif(frames: list, path: str):
-    frames[0].save(path, save_all=True, append_images=frames[1:], duration=50, loop=0)
+def save_gif(events: list[Event], frames: list[Image.Image], path: str):
+
+    def get_duration(event: Event):
+        if event == 'UPDATE':
+            return 100
+        if event == 'GUESS':
+            return 1000
+        if event == 'SOLVED':
+            return 2000
+
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=[get_duration(event) for event in events], loop=0)
 
 def render_animation(fixture: fixtures.Fixture, path: str):
-    frames = []
+    frames:List[Image.Image] = []
+    events:List[Event] = []
 
-    def append_frame(grid: Tuple[str, ...], highlightRow: Optional[int] = None, highlightCol: Optional[int] = None):
-        if grid:
-            frames.append(draw_frame(grid, highlightRow, highlightCol))
+    def append_frame(event: Event, grid: Tuple[str, ...], highlightRow: Optional[int] = None, highlightCol: Optional[int] = None):
 
-    results = search(fixture.rows, fixture.cols, None, append_frame)
-    for result in results:
-        draw_frame(result, None, None)
+        frame = draw_frame(grid, highlightRow, highlightCol)
+        frames.append(frame)
+        events.append(event)
+
+    for _ in search(fixture.rows, fixture.cols, None, append_frame):
+        pass
     
-    save_gif(frames, path)
+    save_gif(events, frames, path)
 
 if __name__ == '__main__':
 

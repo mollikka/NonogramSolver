@@ -1,10 +1,14 @@
-from typing import Generator, Tuple, Optional, Callable, Set
+from typing import Generator, Tuple, Optional, Callable, Set, Literal, Iterable
 
 from functools import cache
 
 FILLED = '#'
 EMPTY = ' '
 UNKNOWN = '?'
+
+Event = Literal['SOLVED', 'UPDATE', 'GUESS']
+
+OnUpdateFunc = Callable[[Event, Tuple[str, ...], Optional[int], Optional[int]], None]
 
 @cache
 def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Generator[str, None, None]:
@@ -64,7 +68,7 @@ def rotate(current_rows: Tuple[str, ...]) -> Tuple[str, ...]:
 def update_rows(current_rows: Tuple[str, ...], 
                 row_hints: Tuple[Tuple[int, ...], ...],
                 rows_to_explore: Optional[Set[int]] = None,
-                on_update: Optional[Callable[[Tuple[str, ...], int], None]] = None) -> Tuple[Tuple[str, ...], Set[int]]:
+                on_update_row: Optional[Callable[[Tuple[str, ...], int], None]] = None) -> Tuple[Tuple[str, ...], Set[int]]:
 
     updated_cols = set()
     for i, [row, hints] in enumerate(zip(current_rows, row_hints)):
@@ -73,7 +77,7 @@ def update_rows(current_rows: Tuple[str, ...],
 
         new_row = update_row(row, hints)
         current_rows = current_rows[:i] + (new_row,) + current_rows[i+1:]
-        if on_update: on_update(current_rows, i)
+        if on_update_row: on_update_row(current_rows, i)
         updated_cols.update({i for i in range(len(new_row)) if row[i] != new_row[i]})
 
     return current_rows, updated_cols
@@ -81,19 +85,19 @@ def update_rows(current_rows: Tuple[str, ...],
 def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
                col_hints: Tuple[Tuple[int, ...], ...],
                initial_rows: Optional[Tuple[str, ...]] = None, 
-               on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None) -> Tuple[str, ...]:
+               on_update: Optional[OnUpdateFunc] = None) -> Tuple[str, ...]:
     width = len(col_hints)
     height = len(row_hints)
 
     current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
     
     def on_update_row(current_rows: Tuple[str, ...], i: int):
-        if on_update: on_update(current_rows, i, None)
+        if on_update: on_update('UPDATE', current_rows, i, None)
 
     def on_update_col(current_rows: Tuple[str, ...], i: int):
-        if on_update: on_update(rotate(current_rows), None, i)
+        if on_update: on_update('UPDATE', rotate(current_rows), None, i)
 
-    cols_to_explore = set(range(width))
+    cols_to_explore = set(i for i in range(width) if UNKNOWN in rotate(current_rows)[i])
     first_round = True
 
     for _ in range(width * height):
@@ -101,19 +105,19 @@ def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
         current_cols = rotate(current_rows)
         current_cols, rows_to_explore = update_rows(current_cols, col_hints, cols_to_explore, on_update_col)
         current_rows = rotate(current_cols)
-        if first_round: rows_to_explore = set(range(height))
+        if first_round: rows_to_explore = set(i for i in range(height) if UNKNOWN in current_rows[i])
         if len(rows_to_explore) == 0: break
         current_rows, cols_to_explore = update_rows(current_rows, row_hints, rows_to_explore, on_update_row)
     
         first_round = False
 
-    if on_update: on_update(current_rows, None, None)
+    if on_update: on_update('SOLVED', current_rows, None, None)
     return current_rows
 
 def search(row_hints: Tuple[Tuple[int, ...], ...],
            col_hints: Tuple[Tuple[int, ...], ...],
            initial_rows: Optional[Tuple[str, ...]] = None,
-           on_update: Optional[Callable[[Tuple[str, ...], Optional[int], Optional[int]], None]] = None)\
+           on_update: Optional[OnUpdateFunc] = None)\
             -> Generator[Tuple[str, ...], None, None]:
 
     current_rows = solve_grid(row_hints, col_hints, initial_rows, on_update)
@@ -140,9 +144,9 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
     i, j = unknown
 
     empty_guess_state = replace_at(current_rows, i, j, EMPTY)
-    if on_update: on_update(empty_guess_state, i, j)
+    if on_update: on_update('GUESS', empty_guess_state, i, j)
     yield from search(row_hints, col_hints, empty_guess_state, on_update)
 
     filled_guess_state = replace_at(current_rows, i, j, FILLED)
-    if on_update: on_update(filled_guess_state, i, j)
+    if on_update: on_update('GUESS', filled_guess_state, i, j)
     yield from search(row_hints, col_hints, filled_guess_state, on_update)
