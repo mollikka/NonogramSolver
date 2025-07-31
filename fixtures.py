@@ -374,3 +374,26 @@ chessboard = Fixture( (
         ' # # # #',
     )
 )
+
+#Indeterminate puzzle
+#https://www.reddit.com/r/nonograms/comments/s3zjym/are_there_any_other_solutions_to_this_nonogram/
+indeterminate = Fixture( (
+        (4,),
+        (3,),
+        (2,1),
+        (1,3),
+        (1,1),
+        (3,),
+        (2,)
+    ,), (
+        (4,),
+        (3,),
+        (2,1),
+        (1,3),
+        (1,1),
+        (3,),
+        (2,)
+    ,), (
+        ''
+    )
+)

@@ -41,6 +41,13 @@ def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Gener
 
     return recurse('', 0, row_hint)
 
+def generate_cell_state(cell_values: Tuple[str, ...]) -> str:
+    if all(value == FILLED for value in cell_values):
+        return FILLED
+    if all(value == EMPTY for value in cell_values):
+        return EMPTY
+    return UNKNOWN
+
 @cache
 def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
     
@@ -51,13 +58,6 @@ def update_row(current_row: str, row_hint: Tuple[int, ...]) -> str:
         return current_row
     
     valid_guesses = generate_valid_guesses(current_row, row_hint)
-
-    def generate_cell_state(cell_values: Tuple[str, ...]) -> str:
-        if all(value == FILLED for value in cell_values):
-            return FILLED
-        if all(value == EMPTY for value in cell_values):
-            return EMPTY
-        return UNKNOWN
 
     return ''.join(generate_cell_state(cell) for cell in zip(*valid_guesses))
 
@@ -111,7 +111,6 @@ def solve_grid(row_hints: Tuple[Tuple[int, ...], ...],
     
         first_round = False
 
-    if on_update: on_update('SOLVED', current_rows, None, None)
     return current_rows
 
 def search(row_hints: Tuple[Tuple[int, ...], ...],
@@ -150,3 +149,8 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
     filled_guess_state = replace_at(current_rows, i, j, FILLED)
     if on_update: on_update('GUESS', filled_guess_state, i, j)
     yield from search(row_hints, col_hints, filled_guess_state, on_update)
+
+def merge_results(results: Iterable[Tuple[str, ...]]) -> Tuple[str, ...]:
+    return tuple(''.join(generate_cell_state(char_of_each_result)
+                    for char_of_each_result in zip(*row_of_each_result))
+                    for row_of_each_result in zip(*results))

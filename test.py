@@ -1,6 +1,6 @@
 import unittest
 
-from nono import generate_valid_guesses, update_row, solve_grid, search
+from nono import generate_valid_guesses, update_row, solve_grid, search, merge_results
 import fixtures
 
 class TestHelperFunctions(unittest.TestCase):
@@ -117,7 +117,19 @@ class Testsolve_grid(unittest.TestCase):
          '##  #',
          '??  #'
         ))
-         
+
+class TestMergeResults(unittest.TestCase):
+    def test_merge_results(self):
+        result_a = ('###  ', '# ###', '#####', '#####', '#####')
+        result_b = ('#### ', '#  ##', '#####', '# # #', '#####')
+        combined = ('###? ', '# ?##', '#####', '#?#?#', '#####')
+        self.assertEqual(tuple(merge_results([result_a,result_b])), combined)
+
+        result_a = ('     ', '    #', '   ##', '  ###', ' ####')
+        result_b = ('#####', ' ####', '  ###', '   ##', '    #')
+        combined = ('?????', ' ???#', '  ?##', '  ?##', ' ???#')
+        self.assertEqual(tuple(merge_results([result_a,result_b])), combined)
+
 class TestSearch(unittest.TestCase):
 
     def test_search_multiline_reasoning(self):

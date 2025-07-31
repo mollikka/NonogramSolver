@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw
 from typing import Tuple, Optional, List
-from nono import FILLED, EMPTY, UNKNOWN, search, Event
+from nono import FILLED, EMPTY, UNKNOWN, search, Event, merge_results
 import fixtures
 
 CELL_SIZE = 20
@@ -66,16 +66,17 @@ def render_animation(fixture: fixtures.Fixture, path: str):
         frames.append(frame)
         events.append(event)
 
-    for _ in search(fixture.rows, fixture.cols, None, append_frame):
-        pass
+    results = list(search(fixture.rows, fixture.cols, None, append_frame))
+    if len(results) == 1:
+        append_frame('SOLVED', results[0], None, None)
+    if len(results) > 1:
+        append_frame('SOLVED', merge_results(results), None, None)
     
     save_gif(events, frames, path)
 
 if __name__ == '__main__':
 
-    indeterminate = fixtures.Fixture(((5,),(1,),(1,1,),(1,),(1,1,),),
-                    ((5,),(1,),(1,1,),(1,),(1,1,),),'')
-    render_animation(indeterminate, 'indeterminate.gif')
+    render_animation(fixtures.indeterminate, 'indeterminate.gif')
 
     multiline_reasoning = fixtures.Fixture((
             (2,),(1,),(),(2,),(2,)
