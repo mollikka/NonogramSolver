@@ -92,17 +92,8 @@ def render_animation_greedy(fixture: fixtures.Fixture, path: str):
 if __name__ == '__main__':
     
     render_animation_solve(fixtures.indeterminate, 'indeterminate.gif')
-
-    multiline_reasoning = fixtures.Fixture((
-            (2,),(1,),(),(2,),(2,)
-        ,), (
-            (2,),(2,),(),(2,),(1,)
-        ,),'')
-    render_animation_solve(multiline_reasoning, 'multiline.gif')
-
-    faulty = fixtures.Fixture(((5,),(1,1,),(1,1,),(1,),(5,),),
-                    ((5,),(1,1,),(1,1,),(1,1,),(5,),),'')
-    render_animation_solve(faulty, 'faulty.gif')
+    render_animation_solve(fixtures.multiline, 'multiline.gif')
+    render_animation_solve(fixtures.faulty, 'faulty.gif')
 
     render_animation_solve(fixtures.chessboard, 'chessboard.gif')
     render_animation_solve(fixtures.apple, 'apple.gif')
@@ -110,10 +101,5 @@ if __name__ == '__main__':
     render_animation_solve(fixtures.rose, 'rose.gif')
     render_animation_solve(fixtures.galaxy, 'galaxy.gif')
     
-    simple = fixtures.Fixture((
-            (5,),(1,1,),(1,1,),(1,1,),(5,)
-        ,), (
-            (5,),(1,1,),(1,1,),(1,1,),(5,)
-        ,),'')
-    render_animation_greedy(simple, 'simple_greedy.gif')
+    render_animation_greedy(fixtures.simple, 'simple_greedy.gif')
     render_animation_greedy(fixtures.apple, 'apple_greedy.gif')

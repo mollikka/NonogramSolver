@@ -31,13 +31,7 @@ class Testsolve_grid(unittest.TestCase):
 
     def test_solve_grid(self):
 
-        self.assertEqual(solve_grid(((5,),(1,1,),(1,1,),(1,1,),(5,),), ((5,),(1,1,),(1,1,),(1,1,),(5,),)), (
-            '#####',
-            '#   #',
-            '#   #',
-            '#   #',
-            '#####'
-        ))
+        self.assertEqual(solve_grid(fixtures.simple.rows, fixtures.simple.cols), fixtures.simple.solution)
 
         self.assertEqual(solve_grid(((5,),(2,1,),(5,),), ((3,),(3,),(1,1,),(1,1,),(3,),)), (
             '#####',
@@ -95,11 +89,9 @@ class Testsolve_grid(unittest.TestCase):
             '??'
         ))
 
-        self.assertEqual(solve_grid( (
-            (2,),(1,),(),(2,),(2,)
-        ,), (
-            (2,),(2,),(),(2,),(1,)
-        ,)), 
+        self.assertEqual(solve_grid(
+            fixtures.multiline.rows, 
+            fixtures.multiline.cols), 
         ('?? ??',
          '?? ??',
          '     ',
@@ -147,16 +139,10 @@ class TestSearch(unittest.TestCase):
             '# ',)
         })
 
-        self.assertEqual(set(search( (
-            (2,),(1,),(),(2,),(2,)
-        ,), (
-            (2,),(2,),(),(2,),(1,)
-        ,))), 
-        {('   ##',
-          '   # ',
-          '     ',
-          '##   ',
-          '##   ')
+        self.assertEqual(set(search(
+            fixtures.multiline.rows, 
+            fixtures.multiline.cols)), 
+        {fixtures.multiline.solution
         })
         
         self.assertEqual(set(search( (
@@ -216,22 +202,17 @@ class TestSearch(unittest.TestCase):
     
     def test_search_faulty(self):
         # if the grid is faulty, search returns an empty set
-
-        row_hints = ((5,),(1,1,),(1,1,),(1,),(5,),)
-        col_hints = ((5,),(1,1,),(1,1,),(1,1,),(5,),)
         
-        self.assertEqual(set(search(row_hints, col_hints)), set())
+        self.assertEqual(set(search(fixtures.faulty.rows, fixtures.faulty.cols)), set())
 
 class Testsolve_greedy(unittest.TestCase):
 
     def test_greedy_search(self):
         
-        self.assertEqual(greedy_search(((5,),(1,1,),(1,1,),(1,1,),(5,),), ((5,),(1,1,),(1,1,),(1,1,),(5,),)), (
-            '#####',
-            '#   #',
-            '#   #',
-            '#   #',
-            '#####'
-        ))
+        self.assertEqual(greedy_search(fixtures.simple.rows, fixtures.simple.cols), fixtures.simple.solution)
 
         self.assertEqual(greedy_search(fixtures.apple.rows, fixtures.apple.cols), fixtures.apple.solution)
+
+    def test_greedy_faulty(self):
+        # if the grid is faulty, search returns None
+        self.assertEqual(greedy_search(fixtures.faulty.rows, fixtures.faulty.cols), None)
