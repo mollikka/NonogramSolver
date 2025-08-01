@@ -1,6 +1,7 @@
 import unittest
 
 from nono import generate_valid_guesses, update_row, solve_grid, search, merge_results
+from greedy import greedy_search
 import fixtures
 
 class TestHelperFunctions(unittest.TestCase):
@@ -220,3 +221,17 @@ class TestSearch(unittest.TestCase):
         col_hints = ((5,),(1,1,),(1,1,),(1,1,),(5,),)
         
         self.assertEqual(set(search(row_hints, col_hints)), set())
+
+class Testsolve_greedy(unittest.TestCase):
+
+    def test_greedy_search(self):
+        
+        self.assertEqual(greedy_search(((5,),(1,1,),(1,1,),(1,1,),(5,),), ((5,),(1,1,),(1,1,),(1,1,),(5,),)), (
+            '#####',
+            '#   #',
+            '#   #',
+            '#   #',
+            '#####'
+        ))
+
+        self.assertEqual(greedy_search(fixtures.apple.rows, fixtures.apple.cols), fixtures.apple.solution)

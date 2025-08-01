@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw
 from typing import Tuple, Optional, List
 from nono import FILLED, EMPTY, UNKNOWN, search, Event, merge_results
+from greedy import greedy_search
 import fixtures
 
 CELL_SIZE = 20
@@ -56,7 +57,7 @@ def save_gif(events: list[Event], frames: list[Image.Image], path: str):
 
     frames[0].save(path, save_all=True, append_images=frames[1:], duration=[get_duration(event) for event in events], loop=0)
 
-def render_animation(fixture: fixtures.Fixture, path: str):
+def render_animation_solve(fixture: fixtures.Fixture, path: str):
     frames:List[Image.Image] = []
     events:List[Event] = []
 
@@ -74,23 +75,45 @@ def render_animation(fixture: fixtures.Fixture, path: str):
     
     save_gif(events, frames, path)
 
-if __name__ == '__main__':
+def render_animation_greedy(fixture: fixtures.Fixture, path: str):
+    frames:List[Image.Image] = []
+    events:List[Event] = []
 
-    render_animation(fixtures.indeterminate, 'indeterminate.gif')
+    def append_frame(event: Event, grid: Tuple[str, ...], highlightRow: Optional[int] = None, highlightCol: Optional[int] = None):
+        frame = draw_frame(grid, highlightRow, highlightCol)
+        frames.append(frame)
+        events.append(event)
+
+    result = greedy_search(fixture.rows, fixture.cols, None, append_frame)
+    if result: append_frame('SOLVED', result, None, None)
+    
+    save_gif(events, frames, path)
+
+if __name__ == '__main__':
+    
+    render_animation_solve(fixtures.indeterminate, 'indeterminate.gif')
 
     multiline_reasoning = fixtures.Fixture((
             (2,),(1,),(),(2,),(2,)
         ,), (
             (2,),(2,),(),(2,),(1,)
         ,),'')
-    render_animation(multiline_reasoning, 'multiline.gif')
+    render_animation_solve(multiline_reasoning, 'multiline.gif')
 
     faulty = fixtures.Fixture(((5,),(1,1,),(1,1,),(1,),(5,),),
                     ((5,),(1,1,),(1,1,),(1,1,),(5,),),'')
-    render_animation(faulty, 'faulty.gif')
+    render_animation_solve(faulty, 'faulty.gif')
 
-    render_animation(fixtures.chessboard, 'chessboard.gif')
-    render_animation(fixtures.apple, 'apple.gif')
-    render_animation(fixtures.wikipedia, 'wikipedia.gif')
-    render_animation(fixtures.rose, 'rose.gif')
-    render_animation(fixtures.galaxy, 'galaxy.gif')
+    render_animation_solve(fixtures.chessboard, 'chessboard.gif')
+    render_animation_solve(fixtures.apple, 'apple.gif')
+    render_animation_solve(fixtures.wikipedia, 'wikipedia.gif')
+    render_animation_solve(fixtures.rose, 'rose.gif')
+    render_animation_solve(fixtures.galaxy, 'galaxy.gif')
+    
+    simple = fixtures.Fixture((
+            (5,),(1,1,),(1,1,),(1,1,),(5,)
+        ,), (
+            (5,),(1,1,),(1,1,),(1,1,),(5,)
+        ,),'')
+    render_animation_greedy(simple, 'simple_greedy.gif')
+    render_animation_greedy(fixtures.apple, 'apple_greedy.gif')
