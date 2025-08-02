@@ -1,7 +1,7 @@
 import unittest
 
-from nono import generate_valid_guesses, update_row, solve_grid, search, merge_results
-from greedy import greedy_search
+from solve import generate_valid_guesses, update_row, solve_grid, search, merge_results
+from dfs import search as dfs_search
 import fixtures
 
 class TestHelperFunctions(unittest.TestCase):
@@ -207,15 +207,15 @@ class TestSearch(unittest.TestCase):
         
         self.assertEqual(set(search(fixtures.faulty.rows, fixtures.faulty.cols)), set())
 
-class Testsolve_greedy(unittest.TestCase):
+class Testsolve_dfs(unittest.TestCase):
 
-    def test_greedy_search(self):
+    def test_search_dfs(self):
         
-        self.assertEqual(greedy_search(fixtures.simple.rows, fixtures.simple.cols), fixtures.simple.solution)
+        self.assertEqual(dfs_search(fixtures.simple.rows, fixtures.simple.cols), fixtures.simple.solution)
 
-        self.assertEqual(greedy_search(fixtures.apple.rows, fixtures.apple.cols), fixtures.apple.solution)
+        self.assertEqual(dfs_search(fixtures.apple.rows, fixtures.apple.cols), fixtures.apple.solution)
 
-        self.assertEqual(greedy_search(fixtures.duck.rows, fixtures.duck.cols), fixtures.duck.solution)
-    def test_greedy_faulty(self):
+        self.assertEqual(dfs_search(fixtures.duck.rows, fixtures.duck.cols), fixtures.duck.solution)
+    def test_search_dfs_faulty(self):
         # if the grid is faulty, search returns None
-        self.assertEqual(greedy_search(fixtures.faulty.rows, fixtures.faulty.cols), None)
+        self.assertEqual(dfs_search(fixtures.faulty.rows, fixtures.faulty.cols), None)

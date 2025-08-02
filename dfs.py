@@ -1,6 +1,6 @@
 
 from typing import Tuple, Optional
-from nono import EMPTY, FILLED, UNKNOWN, OnUpdateFunc
+from definitions import EMPTY, FILLED, UNKNOWN, OnUpdateFunc
 from functools import cache
 
 @cache
@@ -39,7 +39,7 @@ def is_partial_line_valid(row: str, hint: Tuple[int, ...]) -> bool:
             return False
     return True
 
-def greedy_search(row_hints: Tuple[Tuple[int, ...], ...],
+def search(row_hints: Tuple[Tuple[int, ...], ...],
                   col_hints: Tuple[Tuple[int, ...], ...],
                   initial_rows: Optional[Tuple[str, ...]] = None,
                   on_update: Optional[OnUpdateFunc] = None) -> Optional[Tuple[str, ...]]:
@@ -72,9 +72,9 @@ def greedy_search(row_hints: Tuple[Tuple[int, ...], ...],
             return initial_rows
         
         if len(last_row) == width:
-            return greedy_search(row_hints, col_hints, initial_rows + (FILLED,), on_update) or greedy_search(row_hints, col_hints, initial_rows + (EMPTY,), on_update)
+            return search(row_hints, col_hints, initial_rows + (FILLED,), on_update) or search(row_hints, col_hints, initial_rows + (EMPTY,), on_update)
         else:
-            return greedy_search(row_hints, col_hints, initial_rows[:-1] + (last_row+FILLED,), on_update) or greedy_search(row_hints, col_hints, initial_rows[:-1] + (last_row+EMPTY,), on_update)
+            return search(row_hints, col_hints, initial_rows[:-1] + (last_row+FILLED,), on_update) or search(row_hints, col_hints, initial_rows[:-1] + (last_row+EMPTY,), on_update)
     else:
-        return greedy_search(row_hints, col_hints, (FILLED,), on_update) or greedy_search(row_hints, col_hints, (EMPTY,), on_update)
+        return search(row_hints, col_hints, (FILLED,), on_update) or search(row_hints, col_hints, (EMPTY,), on_update)
     

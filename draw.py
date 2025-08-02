@@ -1,7 +1,8 @@
 from PIL import Image, ImageDraw
 from typing import Tuple, Optional, List
-from nono import FILLED, EMPTY, UNKNOWN, search, Event, merge_results
-from greedy import greedy_search
+from definitions import EMPTY, FILLED, UNKNOWN, Event
+from solve import search, merge_results
+from dfs import search as dfs_search
 import fixtures
 
 CELL_SIZE = 20
@@ -75,7 +76,7 @@ def render_animation_solve(fixture: fixtures.Fixture, path: str):
     
     save_gif(events, frames, path)
 
-def render_animation_greedy(fixture: fixtures.Fixture, path: str):
+def render_animation_dfs(fixture: fixtures.Fixture, path: str):
     frames:List[Image.Image] = []
     events:List[Event] = []
 
@@ -84,7 +85,7 @@ def render_animation_greedy(fixture: fixtures.Fixture, path: str):
         frames.append(frame)
         events.append(event)
 
-    result = greedy_search(fixture.rows, fixture.cols, None, append_frame)
+    result = dfs_search(fixture.rows, fixture.cols, None, append_frame)
     if result: append_frame('SOLVED', result, None, None)
     
     save_gif(events, frames, path)
@@ -102,6 +103,6 @@ if __name__ == '__main__':
     render_animation_solve(fixtures.galaxy, 'galaxy.gif')
     render_animation_solve(fixtures.duck, 'duck.gif')
 
-    render_animation_greedy(fixtures.simple, 'simple_greedy.gif')
-    render_animation_greedy(fixtures.apple, 'apple_greedy.gif')
-    render_animation_greedy(fixtures.duck, 'duck_greedy.gif')    
+    render_animation_dfs(fixtures.simple, 'simple_dfs.gif')
+    render_animation_dfs(fixtures.apple, 'apple_dfs.gif')
+    render_animation_dfs(fixtures.duck, 'duck_dfs.gif')    

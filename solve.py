@@ -1,14 +1,6 @@
-from typing import Generator, Tuple, Optional, Callable, Set, Literal, Iterable
-
+from typing import Generator, Tuple, Optional, Callable, Set, Iterable
 from functools import cache
-
-FILLED = '#'
-EMPTY = ' '
-UNKNOWN = '?'
-
-Event = Literal['SOLVED', 'UPDATE', 'GUESS']
-
-OnUpdateFunc = Callable[[Event, Tuple[str, ...], Optional[int], Optional[int]], None]
+from definitions import OnUpdateFunc, FILLED, EMPTY, UNKNOWN
 
 @cache
 def generate_valid_guesses(current_row: str, row_hint: Tuple[int, ...]) -> Generator[str, None, None]:
