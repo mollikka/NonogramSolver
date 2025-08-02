@@ -45,6 +45,8 @@ class Testsolve_grid(unittest.TestCase):
 
         self.assertEqual(solve_grid(fixtures.rose.rows, fixtures.rose.cols), fixtures.rose.solution)
 
+        self.assertEqual(solve_grid(fixtures.duck.rows, fixtures.duck.cols), fixtures.duck.solution)
+ 
     def test_solve_grid_faulty(self):
 
         row_hints = ((5,),(1,1,),(1,1,),(1,),(5,),)
@@ -213,6 +215,7 @@ class Testsolve_greedy(unittest.TestCase):
 
         self.assertEqual(greedy_search(fixtures.apple.rows, fixtures.apple.cols), fixtures.apple.solution)
 
+        self.assertEqual(greedy_search(fixtures.duck.rows, fixtures.duck.cols), fixtures.duck.solution)
     def test_greedy_faulty(self):
         # if the grid is faulty, search returns None
         self.assertEqual(greedy_search(fixtures.faulty.rows, fixtures.faulty.cols), None)

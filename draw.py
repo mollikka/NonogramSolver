@@ -100,6 +100,8 @@ if __name__ == '__main__':
     render_animation_solve(fixtures.wikipedia, 'wikipedia.gif')
     render_animation_solve(fixtures.rose, 'rose.gif')
     render_animation_solve(fixtures.galaxy, 'galaxy.gif')
-    
+    render_animation_solve(fixtures.duck, 'duck.gif')
+
     render_animation_greedy(fixtures.simple, 'simple_greedy.gif')
     render_animation_greedy(fixtures.apple, 'apple_greedy.gif')
+    render_animation_greedy(fixtures.duck, 'duck_greedy.gif')    
