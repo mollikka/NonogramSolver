@@ -22,7 +22,7 @@ def is_valid_line(row: str, hint: Tuple[int, ...]) -> bool:
     return count_streaks(row) == hint
 
 @cache
-def is_partial_line_valid(row: str, hint: Tuple[int, ...]) -> bool:
+def is_partial_line_valid(row: str, hint: Tuple[int, ...], width: int) -> bool:
     blocks = count_streaks(row)
 
     if len(blocks) > len(hint):
@@ -33,10 +33,17 @@ def is_partial_line_valid(row: str, hint: Tuple[int, ...]) -> bool:
     for i, block in enumerate(blocks):
         if block > hint[i]:
             return False
-        if block > hint[i]:
-            return False
         if last_block_is_done and block < hint[i]:
             return False
+
+    blocks_left = hint[len(blocks):]
+
+    if len(blocks_left) == 0:
+        return True
+
+    if width - len(row) < len(blocks_left)-1 + sum(blocks_left):
+        return False
+    
     return True
 
 def search(row_hints: Tuple[Tuple[int, ...], ...],
@@ -65,8 +72,8 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
         if len(last_row) == width and not is_valid_line(last_row, row_hint): return None
         if len(last_col) == height and not is_valid_line(last_col, col_hint): return None
 
-        if len(last_row) < width and not is_partial_line_valid(last_row, row_hint): return None
-        if len(last_col) < height and not is_partial_line_valid(last_col, col_hint): return None
+        if len(last_row) < width and not is_partial_line_valid(last_row, row_hint, width): return None
+        if len(last_col) < height and not is_partial_line_valid(last_col, col_hint, height): return None
 
         if len(last_row) == width and len(last_col) == height:
             return initial_rows
