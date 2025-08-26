@@ -140,17 +140,17 @@ def render_animation_dfs(fixture: fixtures.Fixture, path: str):
 
 if __name__ == '__main__':
     
-    render_animation_solve(fixtures.indeterminate, 'indeterminate.gif')
-    render_animation_solve(fixtures.multiline2, 'multiline.gif')
-    render_animation_solve(fixtures.faulty, 'faulty.gif')
+    render_animation_solve(fixtures.indeterminate, 'renders/indeterminate.gif')
+    render_animation_solve(fixtures.multiline2, 'renders/multiline.gif')
+    render_animation_solve(fixtures.faulty, 'renders/faulty.gif')
 
-    render_animation_solve(fixtures.chessboard, 'chessboard.gif')
-    render_animation_solve(fixtures.apple, 'apple.gif')
-    render_animation_solve(fixtures.wikipedia, 'wikipedia.gif')
-    render_animation_solve(fixtures.rose, 'rose.gif')
-    render_animation_solve(fixtures.galaxy, 'galaxy.gif')
-    render_animation_solve(fixtures.duck, 'duck.gif')
+    render_animation_solve(fixtures.chessboard, 'renders/chessboard.gif')
+    render_animation_solve(fixtures.apple, 'renders/apple.gif')
+    render_animation_solve(fixtures.wikipedia, 'renders/wikipedia.gif')
+    render_animation_solve(fixtures.rose, 'renders/rose.gif')
+    render_animation_solve(fixtures.galaxy, 'renders/galaxy.gif')
+    render_animation_solve(fixtures.duck, 'renders/duck.gif')
 
-    render_animation_dfs(fixtures.simple, 'simple_dfs.gif')
-    render_animation_dfs(fixtures.apple, 'apple_dfs.gif')
-    render_animation_dfs(fixtures.duck, 'duck_dfs.gif')    
+    render_animation_dfs(fixtures.simple, 'renders/simple_dfs.gif')
+    render_animation_dfs(fixtures.apple, 'renders/apple_dfs.gif')
+    render_animation_dfs(fixtures.duck, 'renders/duck_dfs.gif')    
