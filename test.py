@@ -147,18 +147,10 @@ class TestSearch(unittest.TestCase):
         {fixtures.multiline.solution
         })
         
-        self.assertEqual(set(search( (
-            (2,2,),(2,2,),(3,),(3,),(3,),(2,2,),(2,2,)
-        ,), (
-            (2,2,),(2,2,),(3,),(3,),(3,),(2,2,),(2,2,)
-        ,))), 
-        {('##   ##', 
-          '##   ##',
-          '  ###  ', 
-          '  ###  ',
-          '  ###  ', 
-          '##   ##', 
-          '##   ##')
+        self.assertEqual(set(search(
+            fixtures.multiline2.rows, 
+            fixtures.multiline2.cols)), 
+        {fixtures.multiline2.solution
         })
         
         self.assertEqual(set(search( (

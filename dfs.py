@@ -59,7 +59,7 @@ def search(row_hints: Tuple[Tuple[int, ...], ...],
         j = len(last_row)-1
         last_col = "".join(row[j] for row in initial_rows)
 
-        if on_update: on_update(
+        if on_update and last_row[-1] == FILLED: on_update(
                 'UPDATE', 
                 tuple("".join(initial_rows[i][j] if (len(initial_rows) > i and len(initial_rows[i]) > j) else UNKNOWN
                             for j in range(height)
