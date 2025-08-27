@@ -96,6 +96,8 @@ def draw_frame_with_hints(
 
 def save_gif(events: list[Event], frames: list[Image.Image], path: str):
 
+    print(path,len(events))
+
     def get_duration(event: Event):
         if event == 'UPDATE':
             return 100
