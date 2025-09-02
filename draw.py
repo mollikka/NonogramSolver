@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Literal
 from definitions import EMPTY, FILLED, UNKNOWN, Event
-from solve import search, merge_results
+from solve import rotate, search, merge_results, solve_grid, update_rows
 from dfs import search as dfs_search
 import fixtures
 
@@ -140,8 +140,31 @@ def render_animation_dfs(fixture: fixtures.Fixture, path: str):
     
     save_gif(events, frames, path)
 
-if __name__ == '__main__':
+def render_one_step(fixture: fixtures.Fixture, path: str, direction: Literal['row', 'col'], initial_rows: Optional[Tuple[str, ...]])-> Tuple[str, ...]:
+
+    width = len(fixture.cols)
+    height = len(fixture.rows)
+
+    current_rows = initial_rows or tuple(UNKNOWN * width for _ in range(height))
     
+    if direction == 'col': 
+        current = rotate(current_rows)
+        hint = fixture.cols
+    else: 
+        current = current_rows
+        hint = fixture.rows
+    
+    current, _ = update_rows(current, hint, None, None)
+    
+    if direction == 'col': current = rotate(current)
+
+    picture = draw_frame_with_hints(current, fixture.rows, fixture.cols)
+    print(path)    
+    picture.save(path)
+
+    return current
+
+if __name__ == '__main__':
     render_animation_solve(fixtures.indeterminate, 'renders/indeterminate.gif')
     render_animation_solve(fixtures.multiline2, 'renders/multiline.gif')
     render_animation_solve(fixtures.faulty, 'renders/faulty.gif')
@@ -156,3 +179,15 @@ if __name__ == '__main__':
     render_animation_dfs(fixtures.simple, 'renders/simple_dfs.gif')
     render_animation_dfs(fixtures.apple, 'renders/apple_dfs.gif')
     render_animation_dfs(fixtures.duck, 'renders/duck_dfs.gif')    
+    
+    iteration1 = render_one_step(fixtures.apple, 'renders/apple1.png', 'col', None)
+    render_one_step(fixtures.apple, 'renders/apple2.png', 'row', iteration1)
+
+    iteration1 = render_one_step(fixtures.wikipedia, 'renders/wikipedia1.png', 'col', None)
+    iteration2 = render_one_step(fixtures.wikipedia, 'renders/wikipedia2.png', 'row', iteration1)
+    iteration3 = render_one_step(fixtures.wikipedia, 'renders/wikipedia3.png', 'col', iteration2)
+    render_one_step(fixtures.wikipedia, 'renders/wikipedia4.png', 'row', iteration3)
+
+    rowwise_galaxy = draw_frame_with_hints(solve_grid(fixtures.galaxy.rows, fixtures.galaxy.cols), fixtures.galaxy.rows, fixtures.galaxy.cols)
+    rowwise_galaxy.save('renders/galaxy-rowwise.png')
+ 
